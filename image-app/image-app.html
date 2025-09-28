@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="../common-assets/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="image-app.css" />
+        <title>Image app</title>
+    </head>
+    <body>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-9">
+                    <div class="row mb-3">
+                        <div class="col-3">
+                            <img
+                                class="logo"
+                                src="img/ecosort-solutions-logo.png"
+                            />
+                        </div>
+                        <div class="col-9">
+                            <h1 class="display-1">Recycle Sorter</h1>
+                            <p class="sub-title">- Sorting made easy!</p>
+                        </div>
+                    </div>
+                    <div class="row mb-5">
+                        <div class="col">
+                            <button
+                                class="btn btn-start btn-primary btn-lg"
+                                type="button"
+                                onclick="init(this)"
+                            >
+                                Start
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <h2 class="display-6">Har du brug for hjælpe?</h2>
+                        <p>
+                            Klik på 'Start' knappen og få hjælp af AI til at
+                            sortere dit skrald.<br />Tryk 'Start' og kom igang
+                            nu!
+                        </p>
+                    </div>
+                    <div class="row">
+                        <div class="col">trash 1</div>
+                        <div class="col">trash 2</div>
+                        <div class="col">trash 3</div>
+                    </div>
+                    <div class="row">
+                        <div class="col">text 1</div>
+                        <div class="col">text 2</div>
+                        <div class="col">text 3</div>
+                    </div>
+                </div>
+
+                <!--Webcam and prediction labels-->
+                <div class="col-sm-3">
+                    <div id="webcam-container"></div>
+                    <div id="label-container"></div>
+                </div>
+            </div>
+        </div>
+    </body>
+    <script src="image-app.js"></script>
+    <script src="../common-assets/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+</html>
