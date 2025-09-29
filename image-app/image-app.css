@@ -21,35 +21,45 @@ body {
 }
 
 .icon {
-  width: 80px;
-  height: 80px;
+  width: 240px;
+  height: 240px;
   margin: 0 auto; /* center horizontally */
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  cursor: pointer; /* optional if clickable */
+  border-radius: 40px;
 }
 
-.icon-metal-closed {
+.icon.selected {
+  background-color: rgb(182, 243, 182);
+}
+
+.icon-text {
+  margin-left: -20px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.icon-metal.closed {
   background-image: url('img/metal-trash-closed.svg');
 }
 
-.icon-metal-open {
+.icon-metal.open {
   background-image: url('img/metal-trash-open.svg');
 }
 
-.icon-plastic-closed {
+.icon-plastic.closed {
   background-image: url('img/plastic-trash-closed.svg');
 }
 
-.icon-plastic-open {
+.icon-plastic.open {
   background-image: url('img/plastic-trash-open.svg');
 }
 
-.icon-restaffald-closed {
+.icon-restaffald.closed {
   background-image: url('img/restaffald-trash-closed.svg');
 }
 
-.icon-restaffald-open {
+.icon-restaffald.open {
   background-image: url('img/restaffald-trash-open.svg');
 }

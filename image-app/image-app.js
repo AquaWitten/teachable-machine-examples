@@ -2,9 +2,16 @@
 // https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/image
 
 // the link to your model provided by Teachable Machine export panel
-const URL = "https://teachablemachine.withgoogle.com/models/Sb_Re8fGc/";
+const URL = "https://teachablemachine.withgoogle.com/models/kpsqAbiMH/";
+const analysisTimeMs = 1000;
 
 let model, webcam, labelContainer, maxPredictions;
+let markeringsId = ["metal", "plastic", "restaffald"];
+let markeringsobjekter = [];
+
+let lastClass = null;
+let currentStableClass = null;
+lastChangeTime = 0;
 
 // Load the image model and setup the webcam
 async function init(button) {
@@ -21,7 +28,7 @@ async function init(button) {
 
     // Convenience function to setup a webcam
     const flip = true; // whether to flip the webcam
-    webcam = new tmImage.Webcam(400, 400, false); // width, height, flip
+    webcam = new tmImage.Webcam(400, 400, true); // width, height, flip
     await webcam.setup(); // request access to the webcam
     await webcam.play();
     window.requestAnimationFrame(loop);
@@ -33,18 +40,43 @@ async function init(button) {
         // and class labels
         labelContainer.appendChild(document.createElement("div"));
     }
+
+    for (let i = 0; i < markeringsId.length; i++) {
+        markeringsobjekter.push(document.getElementById(markeringsId[i]));
+    }
 }
 
 async function loop() {
     webcam.update(); // update the webcam frame
-    await predict();
+    let predictions = await predict();
+    drawPredictionLabels(predictions);
+    let bestPrediction = findBestPrediction(predictions);
+    markHigestPrediction(bestPrediction.className);
+
+    /*     let now = Date.now;
+    if (bestPrediction.className !== lastClass) {
+        //Class changed
+        lastClass = bestPrediction.className;
+        lastChangeTime = now;
+    } else {
+        if (currentStableClass !== lastClass) {
+            if (lastChangeTime <= now + analysisTimeMs) {
+                currentStableClass = lastClass;
+                markHigestPrediction(currentStableClass);
+            }
+        }
+    } */
+
     window.requestAnimationFrame(loop);
 }
 
 // run the webcam image through the image model
 async function predict() {
     // predict can take in an image, video or canvas html element
-    const prediction = await model.predict(webcam.canvas);
+    return model.predict(webcam.canvas);
+}
+
+function drawPredictionLabels(prediction) {
     for (let i = 0; i < maxPredictions; i++) {
         const classPrediction =
             prediction[i].className +
@@ -52,4 +84,62 @@ async function predict() {
             prediction[i].probability.toFixed(2);
         labelContainer.childNodes[i].innerHTML = classPrediction;
     }
+}
+
+function findBestPrediction(predictions) {
+    return (bestPrediction = predictions.reduce((max, p) =>
+        p.probability > max.probability ? p : max
+    ));
+}
+
+function markHigestPrediction(className) {
+    switch (className) {
+        case "metal":
+            if (currentStableClass != className) {
+                console.log("Metal er fundet");
+                currentStableClass = className;
+                resetMarking();
+                selectMarkering(markeringsobjekter[0]);
+            }
+            break;
+        case "plastik":
+            if (currentStableClass != className) {
+                console.log("Plastik er fundet");
+                currentStableClass = className;
+                resetMarking();
+                selectMarkering(markeringsobjekter[1]);
+            }
+            break;
+        case "restaffald":
+            if (currentStableClass != className) {
+                console.log("Restaffald er fundet");
+                currentStableClass = className;
+                resetMarking();
+                selectMarkering(markeringsobjekter[2]);
+            }
+            break;
+        default:
+            if (currentStableClass != "uidentificerbart") {
+                console.log("uidentificerbart objekt");
+                currentStableClass = "uidentificerbart";
+                resetMarking();
+            }
+    }
+}
+
+function resetMarking() {
+    for (let i = 0; i < markeringsobjekter.length; i++) {
+        let object = markeringsobjekter[i];
+        object.classList.remove("selected");
+        if (object.classList.contains("open")) {
+            object.classList.remove("open");
+            object.classList.add("closed");
+        }
+    }
+}
+
+function selectMarkering(objekt) {
+    objekt.classList.add("selected");
+    objekt.classList.remove("closed");
+    objekt.classList.add("open");
 }
