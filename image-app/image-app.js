@@ -9,13 +9,14 @@ let model, webcam, labelContainer, maxPredictions;
 let markeringsId = ["metal", "plastic", "restaffald"];
 let markeringsobjekter = [];
 
-let lastClass = null;
-let currentStableClass = null;
+let lastClass = "";
+let currentStableClass = "";
 lastChangeTime = 0;
 
 // Load the image model and setup the webcam
 async function init(button) {
     button.disabled = true;
+    lastChangeTime = Date.now;
     const modelURL = URL + "model.json";
     const metadataURL = URL + "metadata.json";
 
@@ -51,21 +52,24 @@ async function loop() {
     let predictions = await predict();
     drawPredictionLabels(predictions);
     let bestPrediction = findBestPrediction(predictions);
-    markHigestPrediction(bestPrediction.className);
+    //markHigestPrediction(bestPrediction.className);
 
-    /*     let now = Date.now;
+    let now = Date.now();
     if (bestPrediction.className !== lastClass) {
+        /* console.log("Nye prediction er anderledes end sidste"); */
         //Class changed
         lastClass = bestPrediction.className;
         lastChangeTime = now;
     } else {
         if (currentStableClass !== lastClass) {
-            if (lastChangeTime <= now + analysisTimeMs) {
-                currentStableClass = lastClass;
+            if (now >= lastChangeTime + analysisTimeMs) {
+                console.log("Current stable class opdateret");
+                currentStableClass = bestPrediction.className;
+                lastClass = currentStableClass;
                 markHigestPrediction(currentStableClass);
             }
         }
-    } */
+    }
 
     window.requestAnimationFrame(loop);
 }
@@ -95,35 +99,23 @@ function findBestPrediction(predictions) {
 function markHigestPrediction(className) {
     switch (className) {
         case "metal":
-            if (currentStableClass != className) {
-                console.log("Metal er fundet");
-                currentStableClass = className;
-                resetMarking();
-                selectMarkering(markeringsobjekter[0]);
-            }
+            console.log("Metal er fundet");
+            resetMarking();
+            selectMarkering(markeringsobjekter[0]);
             break;
         case "plastik":
-            if (currentStableClass != className) {
-                console.log("Plastik er fundet");
-                currentStableClass = className;
-                resetMarking();
-                selectMarkering(markeringsobjekter[1]);
-            }
+            console.log("Plastik er fundet");
+            resetMarking();
+            selectMarkering(markeringsobjekter[1]);
             break;
         case "restaffald":
-            if (currentStableClass != className) {
-                console.log("Restaffald er fundet");
-                currentStableClass = className;
-                resetMarking();
-                selectMarkering(markeringsobjekter[2]);
-            }
+            console.log("Restaffald er fundet");
+            resetMarking();
+            selectMarkering(markeringsobjekter[2]);
             break;
         default:
-            if (currentStableClass != "uidentificerbart") {
-                console.log("uidentificerbart objekt");
-                currentStableClass = "uidentificerbart";
-                resetMarking();
-            }
+            console.log("uidentificerbart objekt");
+            resetMarking();
     }
 }
 
