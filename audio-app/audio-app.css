@@ -1,0 +1,93 @@
+body {
+  background-color: #ffffff;
+  padding: 20px;
+}
+
+#webcam-container {
+  position: relative;
+  width: 400px;
+  height: 400px;
+  background-color: grey;
+}
+
+#webcam-text {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-weight: bold;
+  font-size: 24px;
+}
+
+#model-id-container {
+  padding-top: 8px;
+}
+
+.logo {
+  width: 240px;
+  height: auto;
+  border-radius: 80px;
+  border-style: solid;
+}
+
+.sub-title {
+  color: rgb(91, 91, 91);
+  font-size: 18px;
+  font-style: italic;
+}
+
+.btn-start {
+  width: 240px;
+}
+
+.icon {
+  width: 80px;
+  height: 100px;
+  margin: 0 auto; /* center horizontally */
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  border-radius: 15px;
+  position: absolute;
+}
+
+.icon.on {
+  background-color: rgb(182, 243, 182);
+}
+
+.icon.off {
+  background-color: rgb(230, 230, 230);
+}
+
+.icon.selected {
+  outline-color: rgb(17, 78, 100);
+  outline-style: dashed;
+  outline-width: 3px;
+}
+
+.icon-text {
+  margin-left: -20px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.icon-coffee {
+  top: 80%;
+  left: 54%;
+  transform: translate(-50%, -50%);
+  background-image: url('img/coffee-machine.svg');
+}
+
+.icon-tv {
+  top: 48%;
+  left: 35%;
+  transform: translate(-50%, -50%);
+  background-image: url('img/tv.svg');
+}
+
+.icon-light {
+  top: 57%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-image: url('img/light-bulb.svg');
+}
