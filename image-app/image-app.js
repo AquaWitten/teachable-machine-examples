@@ -2,7 +2,8 @@
 // https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/image
 
 // the link to your model provided by Teachable Machine export panel
-const URL = "https://teachablemachine.withgoogle.com/models/kpsqAbiMH/";
+//const URL = "https://teachablemachine.withgoogle.com/models/kpsqAbiMH/";
+const URL = "https://teachablemachine.withgoogle.com/models/";
 const analysisTimeMs = 1000;
 
 let model, webcam, labelContainer, maxPredictions;
@@ -17,8 +18,9 @@ lastChangeTime = 0;
 async function init(button) {
     button.disabled = true;
     lastChangeTime = Date.now;
-    const modelURL = URL + "model.json";
-    const metadataURL = URL + "metadata.json";
+    let modelID = getModelId();
+    const modelURL = URL + modelID + "/model.json";
+    const metadataURL = URL + modelID + "/metadata.json";
 
     // load the model and metadata
     // Refer to tmImage.loadFromFiles() in the API to support files from a file picker
@@ -32,6 +34,13 @@ async function init(button) {
     webcam = new tmImage.Webcam(400, 400, true); // width, height, flip
     await webcam.setup(); // request access to the webcam
     await webcam.play();
+
+    //Remove kamera placeholder text and input field
+    let cameraText = document.getElementById("webcam-text");
+    let inputfield = document.getElementById("model-id");
+    cameraText.style.display = "none";
+    inputfield.style.display = "none";
+
     window.requestAnimationFrame(loop);
 
     // append elements to the DOM
@@ -134,4 +143,10 @@ function selectMarkering(objekt) {
     objekt.classList.add("selected");
     objekt.classList.remove("closed");
     objekt.classList.add("open");
+}
+
+function getModelId() {
+    let id = document.getElementById("model-id").value;
+    console.log("Model ID: " + id);
+    return id;
 }

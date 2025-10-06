@@ -3,6 +3,26 @@ body {
   padding: 20px;
 }
 
+#webcam-container {
+  position: relative;
+  width: 400px;
+  height: 400px;
+  background-color: grey;
+}
+
+#webcam-text {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-weight: bold;
+  font-size: 24px;
+}
+
+#model-id-container {
+  padding-top: 8px;
+}
+
 .logo {
   width: 240px;
   height: auto;
