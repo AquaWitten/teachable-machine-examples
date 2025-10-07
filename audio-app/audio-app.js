@@ -2,17 +2,14 @@
 // https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/image
 
 // the link to your model provided by Teachable Machine export panel
-//const URL = "https://teachablemachine.withgoogle.com/models/YyxaZHkhU/";
+//const URL = "https://teachablemachine.withgoogle.com/models/E-0_hzAhF/";
 const URL = "https://teachablemachine.withgoogle.com/models/";
-const analysisTimeMs = 1000;
 
-let model, webcam, labelContainer, maxPredictions;
-let markeringsId = ["tv", "kaffe", "lys"];
+let labelContainer;
+let markeringsId = ["kaffe", "lys", "tv"];
 let markeringsobjekter = [];
-
-let lastClass = "";
-let currentStableClass = "";
-lastChangeTime = 0;
+let currentSelection;
+let lastPrediction = { score: 0, label: "" };
 
 async function createModel(modelID) {
     const checkpointURL = URL + modelID + "/model.json"; // model topology
@@ -34,6 +31,8 @@ async function createModel(modelID) {
 async function init() {
     let modelID = getModelId();
     if (modelID != "") {
+        findModelElements();
+
         const recognizer = await createModel(modelID);
         const classLabels = recognizer.wordLabels(); // get class labels
         console.log(classLabels);
@@ -48,16 +47,19 @@ async function init() {
         recognizer.listen(
             (result) => {
                 const scores = result.scores; // probability of prediction for each class
-                // render the probability scores per class
-                for (let i = 0; i < classLabels.length; i++) {
-                    const classPrediction =
-                        classLabels[i] + ": " + result.scores[i].toFixed(2);
-                    labelContainer.childNodes[i].innerHTML = classPrediction;
+                appendElementsToDom(labelContainer, classLabels, scores);
+
+                let predictions = combineScoreAndLabel(scores, classLabels);
+                let bestPrediction = findBestPrediction(predictions);
+
+                if (bestPrediction.label != lastPrediction.label) {
+                    lastPrediction = bestPrediction;
+                    handlePrediction(bestPrediction);
                 }
             },
             {
                 includeSpectrogram: false, // in case listen should return result.spectrogram
-                probabilityThreshold: 0.75,
+                probabilityThreshold: 0.7,
                 invokeCallbackOnNoiseAndUnknown: true,
                 overlapFactor: 0.5, // probably want between 0.5 and 0.75. More info in README
             }
@@ -70,117 +72,83 @@ async function init() {
     }
 }
 
-// Load the image model and setup the webcam
-/* async function init(button) {
-    button.disabled = true;
-    lastChangeTime = Date.now;
-
-    // load the model and metadata
-    // Refer to tmImage.loadFromFiles() in the API to support files from a file picker
-    // or files from your local hard drive
-    // Note: the pose library adds "tmImage" object to your window (window.tmImage)
-    model = await tmImage.load(modelURL, metadataURL);
-    maxPredictions = model.getTotalClasses();
-
-    // Convenience function to setup a webcam
-    const flip = true; // whether to flip the webcam
-    webcam = new tmImage.Webcam(400, 400, true); // width, height, flip
-    await webcam.setup(); // request access to the webcam
-    await webcam.play();
-
-    removePlaceholders();
-    window.requestAnimationFrame(loop);
-    appendElementsToDom();
-    findModelElements();
-} */
-
-async function loop() {
-    webcam.update(); // update the webcam frame
-    let predictions = await predict();
-    drawPredictionLabels(predictions);
-    let bestPrediction = findBestPrediction(predictions);
-    //markHigestPrediction(bestPrediction.className);
-
-    let now = Date.now();
-    if (bestPrediction.className !== lastClass) {
-        /* console.log("Nye prediction er anderledes end sidste"); */
-        //Class changed
-        lastClass = bestPrediction.className;
-        lastChangeTime = now;
-    } else {
-        if (currentStableClass !== lastClass) {
-            if (now >= lastChangeTime + analysisTimeMs) {
-                console.log("Current stable class opdateret");
-                currentStableClass = bestPrediction.className;
-                lastClass = currentStableClass;
-                markHigestPrediction(currentStableClass);
-            }
-        }
-    }
-
-    window.requestAnimationFrame(loop);
-}
-
-// run the webcam image through the image model
-async function predict() {
-    // predict can take in an image, video or canvas html element
-    return model.predict(webcam.canvas);
-}
-
-function drawPredictionLabels(prediction) {
-    for (let i = 0; i < maxPredictions; i++) {
-        const classPrediction =
-            prediction[i].className +
-            ": " +
-            prediction[i].probability.toFixed(2);
-        labelContainer.childNodes[i].innerHTML = classPrediction;
-    }
-}
-
 function findBestPrediction(predictions) {
-    return (bestPrediction = predictions.reduce((max, p) =>
-        p.probability > max.probability ? p : max
-    ));
+    predictions.sort((a, b) => b.score - a.score);
+    return predictions[0];
 }
 
-function markHigestPrediction(className) {
-    switch (className) {
-        case "metal":
-            console.log("Metal er fundet");
-            resetMarking();
-            selectMarkering(markeringsobjekter[0]);
+function combineScoreAndLabel(scores, labels) {
+    if (scores.length != scores.length) {
+        console.error("Amount of Scores and labels do not match");
+        return null;
+    }
+    let predictions = [];
+    for (let i = 0; i < scores.length; i++) {
+        predictions.push({
+            score: scores[i],
+            label: labels[i],
+        });
+    }
+
+    return predictions;
+}
+
+function handlePrediction(prediction) {
+    switch (prediction.label.toLowerCase()) {
+        case "tænd":
+            console.log("Tænd registreret");
+            if (currentSelection != null) {
+                currentSelection.classList.add("on");
+                currentSelection.classList.remove("off");
+                removeSelection();
+            }
+            removeSelection();
             break;
-        case "plastik":
-            console.log("Plastik er fundet");
-            resetMarking();
-            selectMarkering(markeringsobjekter[1]);
+        case "sluk":
+            console.log("Sluk registreret");
+            if (currentSelection != null) {
+                currentSelection.classList.add("off");
+                currentSelection.classList.remove("on");
+                removeSelection();
+            }
             break;
-        case "restaffald":
-            console.log("Restaffald er fundet");
-            resetMarking();
-            selectMarkering(markeringsobjekter[2]);
+        case "kaffe":
+            console.log("Kaffe registreret");
+            removeSelection();
+            setSelection(markeringsobjekter[0]);
+            break;
+        case "lys":
+            console.log("Lys registreret");
+            removeSelection();
+            setSelection(markeringsobjekter[1]);
+            break;
+        case "tv":
+            console.log("TV registreret");
+            removeSelection();
+            setSelection(markeringsobjekter[2]);
+            break;
+        case "background noise":
+        case "unknown":
+            console.log("Baggrundslyd registeret");
             break;
         default:
             console.log("uidentificerbart objekt");
-            resetMarking();
     }
 }
 
-function resetMarking() {
-    for (let i = 0; i < markeringsobjekter.length; i++) {
-        let object = markeringsobjekter[i];
-        object.classList.remove("selected");
-        if (object.classList.contains("open")) {
-            object.classList.remove("open");
-            object.classList.add("closed");
-        }
+function removeSelection() {
+    if (currentSelection == null) {
+        console.log("Current selection is null");
+        return;
     }
+
+    currentSelection.classList.remove("selected");
+    currentSelection = null;
 }
 
-function selectMarkering(objekt) {
+function setSelection(objekt) {
     objekt.classList.add("selected");
-    objekt.classList.remove("closed");
-    objekt.classList.add("open");
+    currentSelection = objekt;
 }
 
 function getModelId() {
@@ -189,21 +157,11 @@ function getModelId() {
     return id;
 }
 
-function removePlaceholders() {
-    //Remove kamera placeholder text and input field
-    let cameraText = document.getElementById("webcam-text");
-    let inputfield = document.getElementById("model-id");
-    cameraText.style.display = "none";
-    inputfield.style.display = "none";
-}
-
-function appendElementsToDom() {
-    // append elements to the DOM
-    document.getElementById("webcam-container").appendChild(webcam.canvas);
-    labelContainer = document.getElementById("label-container");
-    for (let i = 0; i < maxPredictions; i++) {
-        // and class labels
-        labelContainer.appendChild(document.createElement("div"));
+function appendElementsToDom(labelContainer, classLabels, scores) {
+    // render the probability scores per class
+    for (let i = 0; i < classLabels.length; i++) {
+        const classPrediction = classLabels[i] + ": " + scores[i].toFixed(2);
+        labelContainer.childNodes[i].innerHTML = classPrediction;
     }
 }
 
