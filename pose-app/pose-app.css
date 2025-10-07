@@ -1,0 +1,85 @@
+body {
+  background-color: #ffffff;
+  padding: 20px;
+}
+
+#webcam-container {
+  position: relative;
+  width: 400px;
+  height: 400px;
+  background-color: grey;
+}
+
+#webcam-text {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-weight: bold;
+  font-size: 24px;
+}
+
+#model-id-container {
+  padding-top: 8px;
+}
+
+.logo {
+  width: 240px;
+  height: auto;
+  border-radius: 80px;
+  border-style: solid;
+}
+
+.sub-title {
+  color: rgb(91, 91, 91);
+  font-size: 18px;
+  font-style: italic;
+}
+
+.btn-start {
+  width: 240px;
+}
+
+.icon {
+  width: 240px;
+  height: 240px;
+  margin: 0 auto; /* center horizontally */
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  border-radius: 40px;
+}
+
+.icon.selected {
+  background-color: rgb(182, 243, 182);
+}
+
+.icon-text {
+  margin-left: -20px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.icon-metal.closed {
+  background-image: url('img/metal-trash-closed.svg');
+}
+
+.icon-metal.open {
+  background-image: url('img/metal-trash-open.svg');
+}
+
+.icon-plastic.closed {
+  background-image: url('img/plastic-trash-closed.svg');
+}
+
+.icon-plastic.open {
+  background-image: url('img/plastic-trash-open.svg');
+}
+
+.icon-restaffald.closed {
+  background-image: url('img/restaffald-trash-closed.svg');
+}
+
+.icon-restaffald.open {
+  background-image: url('img/restaffald-trash-open.svg');
+}

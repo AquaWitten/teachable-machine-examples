@@ -1,1 +1,96 @@
-Fitness Coach
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="../common-assets/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="pose-app.css" />
+        <title>Pose app</title>
+    </head>
+    <body>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-9">
+                    <div class="row mb-3">
+                        <div class="col-3">
+                            <img
+                                class="logo"
+                                src="img/fitfuture-labs-logo.png"
+                            />
+                        </div>
+                        <div class="col-9">
+                            <h1 class="display-1">Fitness Coach</h1>
+                            <p class="sub-title">- Fitness made FUN!</p>
+                        </div>
+                    </div>
+                    <div class="row mb-5">
+                        <div class="col">
+                            <button
+                                class="btn btn-start btn-primary btn-lg"
+                                type="button"
+                                onclick="init(this)"
+                            >
+                                Start
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row mb-5">
+                        <h2 class="display-6">Har du brug for hjælp?</h2>
+                        <p>
+                            Klik på 'Start' knappen og få hjælp af AI til at
+                            sortere dit skrald.<br />Tryk 'Start' og kom i gang
+                            nu!
+                        </p>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col">
+                            <div
+                                id="metal"
+                                class="icon icon-metal closed"
+                            ></div>
+                        </div>
+                        <div class="col">
+                            <div
+                                id="plastic"
+                                class="icon icon-plastic closed"
+                            ></div>
+                        </div>
+                        <div class="col">
+                            <div
+                                id="restaffald"
+                                class="icon icon-restaffald closed"
+                            ></div>
+                        </div>
+                    </div>
+                    <div class="row text-center">
+                        <div class="col">
+                            <p class="icon-text">Metalaffald</p>
+                        </div>
+                        <div class="col">
+                            <p class="icon-text">Plastikaffald</p>
+                        </div>
+                        <div class="col">
+                            <p class="icon-text">Restaffald</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Webcam and prediction labels-->
+                <div class="col-sm-3">
+                    <div id="webcam-container">
+                        <p id="webcam-text">Kamera</p>
+                    </div>
+                    <div id="model-id-container">
+                        <label for="model-id">Model ID</label>
+                        <input id="model-id" type="text" />
+                    </div>
+                    <div id="label-container"></div>
+                </div>
+            </div>
+        </div>
+    </body>
+    <script src="pose-app.js"></script>
+    <script src="../common-assets/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+</html>
