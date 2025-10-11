@@ -40,46 +40,60 @@ body {
   width: 240px;
 }
 
+.icon.selected {
+  outline-color: rgb(14, 19, 99);
+  outline-width: 4px;
+  outline-style: dashed;
+}
+
+/* When active: reveal the fill by sliding gradient upward */
+.icon.active::before {
+  background-position: bottom;
+  transition-duration: 5s; /* slow fill-up */
+}
+
 .icon {
-  width: 240px;
-  height: 240px;
-  margin: 0 auto; /* center horizontally */
+  position: relative;
+  width: 100%;                /* Take full width of column */
+  aspect-ratio: 1 / 1;        /* Keep square shape (optional, can tweak) */
+  background-size: contain;   /* Fit inside without cropping */
+  background-repeat: no-repeat;
+  background-position: center;
+  border-radius: 20px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+/* 1️⃣ The gradient fill layer (behind the image) */
+.icon::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgb(182, 243, 182) 50%, transparent 50%);
+  background-size: 100% 200%;
+  background-position: top; /* Start with gradient below visible area */
+  transition: background-position 0.5s ease-in-out;
+  z-index: 0;
+}
+
+/* 2️⃣ The image layer (on top of gradient) */
+.icon::after {
+  content: "";
+  position: absolute;
+  inset: 0;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  border-radius: 40px;
+  z-index: 1;
 }
 
-.icon.selected {
-  background-color: rgb(182, 243, 182);
+/* ICON IMAGES */
+.icon-salute::after {
+  background-image: url('img/upward-salute-pose.png');
 }
-
-.icon-text {
-  margin-left: -20px;
-  font-size: 18px;
-  font-weight: bold;
+.icon-side::after {
+  background-image: url('img/extended-side-pose.png');
 }
-
-.icon-metal.closed {
-  background-image: url('img/metal-trash-closed.svg');
-}
-
-.icon-metal.open {
-  background-image: url('img/metal-trash-open.svg');
-}
-
-.icon-plastic.closed {
-  background-image: url('img/plastic-trash-closed.svg');
-}
-
-.icon-plastic.open {
-  background-image: url('img/plastic-trash-open.svg');
-}
-
-.icon-restaffald.closed {
-  background-image: url('img/restaffald-trash-closed.svg');
-}
-
-.icon-restaffald.open {
-  background-image: url('img/restaffald-trash-open.svg');
+.icon-warrior::after {
+  background-image: url('img/warrior-pose.png');
 }
