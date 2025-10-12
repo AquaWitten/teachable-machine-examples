@@ -5,45 +5,52 @@
 //const URL = "https://teachablemachine.withgoogle.com/models/fbz9_1zvV/";
 const URL = "https://teachablemachine.withgoogle.com/models/";
 const MODEL_CLASS_LABELS = ["upward-salute", "extended-side", "warrior"];
+const COMPLETION_TIME = 5000;
+const FAIL_TIME = 500;
 let model, webcam, ctx, labelContainer, maxPredictions;
 let lastClass, targetClass, lastChangeTime;
+let completePoseTimerId, poseInaccuracyTimerId;
 let poseLockedIn = false;
 let targetPoseElements = [];
 
 async function init() {
     const MODEL_ID = getModelId();
-    const modelURL = URL + MODEL_ID + "/model.json";
-    const metadataURL = URL + MODEL_ID + "/metadata.json";
+    if (MODEL_ID) {
+        const modelURL = URL + MODEL_ID + "/model.json";
+        const metadataURL = URL + MODEL_ID + "/metadata.json";
 
-    // load the model and metadata
-    // Refer to tmImage.loadFromFiles() in the API to support files from a file picker
-    // Note: the pose library adds a tmPose object to your window (window.tmPose)
-    model = await tmPose.load(modelURL, metadataURL);
-    maxPredictions = model.getTotalClasses();
+        // load the model and metadata
+        // Refer to tmImage.loadFromFiles() in the API to support files from a file picker
+        // Note: the pose library adds a tmPose object to your window (window.tmPose)
+        model = await tmPose.load(modelURL, metadataURL);
+        maxPredictions = model.getTotalClasses();
 
-    // Convenience function to setup a webcam
-    const size = 400;
-    const flip = true; // whether to flip the webcam
-    webcam = new tmPose.Webcam(size, size, flip); // width, height, flip
-    await webcam.setup(); // request access to the webcam
-    await webcam.play();
+        // Convenience function to setup a webcam
+        const size = 400;
+        const flip = true; // whether to flip the webcam
+        webcam = new tmPose.Webcam(size, size, flip); // width, height, flip
+        await webcam.setup(); // request access to the webcam
+        await webcam.play();
 
-    getTargetPoseElements();
-    setNewNextPose();
-    window.requestAnimationFrame(loop);
+        getTargetPoseElements();
+        setNewNextPose();
+        window.requestAnimationFrame(loop);
 
-    //Hidde Camera placeholders
-    hiddeCameraPlaceholders();
+        //Hidde Camera placeholders
+        hiddeCameraPlaceholders();
 
-    // append/get elements to the DOM
-    const canvas = document.getElementById("canvas");
-    canvas.width = size;
-    canvas.height = size;
-    ctx = canvas.getContext("2d");
-    labelContainer = document.getElementById("label-container");
-    for (let i = 0; i < maxPredictions; i++) {
-        // and class labels
-        labelContainer.appendChild(document.createElement("div"));
+        // append/get elements to the DOM
+        const canvas = document.getElementById("canvas");
+        canvas.width = size;
+        canvas.height = size;
+        ctx = canvas.getContext("2d");
+        labelContainer = document.getElementById("label-container");
+        for (let i = 0; i < maxPredictions; i++) {
+            // and class labels
+            labelContainer.appendChild(document.createElement("div"));
+        }
+    } else {
+        alert("Ingen Model ID er indtastet!");
     }
 }
 
@@ -56,16 +63,33 @@ async function loop() {
     let bestPrediction = findBestPrediction(predictions);
     let predictionClass = bestPrediction.className;
 
-    if (predictionClass !== lastClass) {
-        lastChangeTime = Date.now();
-        if (poseLockedIn) {
-            //Have a small timer that allows you to be off for a few milliseconds
+    if (predictionClass !== targetClass) {
+        if (poseLockedIn && !poseInaccuracyTimerId) {
+            poseInaccuracyTimerId = setTimeout(() => {
+                console.log(
+                    "Failed to hold POSE " +
+                        targetClass +
+                        " for required duration of " +
+                        COMPLETION_TIME +
+                        "ms"
+                );
+                removeActiveClass();
+                poseLockedIn = false;
+                poseInaccuracyTimerId = null;
+                if (completePoseTimerId) {
+                    clearTimeout(completePoseTimerId);
+                    completePoseTimerId = null;
+                }
+            }, FAIL_TIME);
+        }
+    } else if (predictionClass === targetClass && poseLockedIn) {
+        if (poseInaccuracyTimerId) {
+            clearTimeout(poseInaccuracyTimerId);
+            poseInaccuracyTimerId = null;
         }
     } else if (predictionClass === targetClass && !poseLockedIn) {
         poseLockedIn = true;
-        //Add class to start animation
-        //Start timer to completion
-        
+        startTimer();
     }
     lastClass = predictionClass;
     window.requestAnimationFrame(loop);
@@ -104,6 +128,55 @@ function drawPose(pose) {
 }
 
 //Custom code
+function startTimer() {
+    //Start timer to completion
+    startCompletionTimer();
+
+    //Add class to start animation
+    switch (targetClass) {
+        case "upward-salute":
+            targetPoseElements[0].classList.add("active");
+            break;
+        case "extended-side":
+            targetPoseElements[1].classList.add("active");
+            break;
+        case "warrior":
+            targetPoseElements[2].classList.add("active");
+            break;
+    }
+}
+
+function startCompletionTimer() {
+    if (completePoseTimerId) {
+        clearTimeout(completePoseTimerId);
+        completePoseTimerId = null;
+    }
+
+    completePoseTimerId = setTimeout(() => {
+        //Reset all elements
+        for (let i = 0; i < targetPoseElements.length; i++) {
+            targetPoseElements[i].classList.remove("selected");
+            targetPoseElements[i].classList.remove("active");
+        }
+        //Find new pose and mark it
+        setNewNextPose();
+        poseLockedIn = false;
+
+        //Reset timers
+        completePoseTimerId = null;
+        if (poseInaccuracyTimerId) {
+            clearTimeout(poseInaccuracyTimerId);
+            poseInaccuracyTimerId = null;
+        }
+    }, COMPLETION_TIME);
+}
+
+function removeActiveClass() {
+    for (let i = 0; i < targetPoseElements.length; i++) {
+        targetPoseElements[i].classList.remove("active");
+    }
+}
+
 function getModelId() {
     let id = document.getElementById("model-id").value;
     console.log("Model ID: " + id);
@@ -146,10 +219,6 @@ function setNewNextPose() {
 }
 
 function updateSelectionMarker(targetClass) {
-    for (let i = 0; i < targetPoseElements.length; i++) {
-        targetPoseElements[i].classList.remove("selected");
-    }
-
     switch (targetClass) {
         case "upward-salute":
             setSelectedClass(targetPoseElements[0]);
